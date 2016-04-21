@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libwebsockets
 PKG_VERSION:=1.7.5
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_PROTO:=git
@@ -31,7 +31,10 @@ define Package/$(PKG_NAME)
 	SECTION:=libs
 	CATEGORY:=Libraries
 	TITLE:=libwebsockets
-	DEPENDS:=+zlib
+	DEPENDS:=+zlib \
+		+$(PKG_NAME)_SSL_OpenSSL:libopenssl \
+		+$(PKG_NAME)_SSL_CyaSSL:libcyassl
+
 	URL:=https://libwebsockets.org
 	MAINTAINER:=Karl Palsson <karlp@remake.is>
 endef
@@ -63,18 +66,18 @@ CMAKE_OPTIONS += -DLWS_WITHOUT_TESTAPPS=ON
 # CMAKE_OPTIONS += -DLWS_WITHOUT_SERVER=ON
 # CMAKE_OPTIONS += -DLWS_WITHOUT_DEBUG=ON
 
-ifeq ($($(PKG_NAME)_SSL_none),y)
-	CMAKE_OPTIONS += -DLWS_WITH_SSL=ON
-else
+ifeq ($(CONFIG_$(PKG_NAME)_SSL_none),y)
 	CMAKE_OPTIONS += -DLWS_WITH_SSL=OFF
+else
+	CMAKE_OPTIONS += -DLWS_WITH_SSL=ON
 endif
 
-ifeq ($($(PKG_NAME)_SSL_OpenSSL),y)
+ifeq ($(CONFIG_$(PKG_NAME)_SSL_OpenSSL),y)
 	CMAKE_OPTIONS += -DLWS_OPENSSL_SUPPORT=ON
 	CMAKE_OPTIONS += -DLWS_OPENSSL_CLIENT_CERTS=/etc/ssl/certs
 endif
 
-ifeq ($($(PKG_NAME)_SSL_CyaSSL),y)
+ifeq ($(CONFIG_$(PKG_NAME)_SSL_CyaSSL),y)
 	CMAKE_OPTIONS += -DLWS_OPENSSL_SUPPORT=ON
 	CMAKE_OPTIONS += -DLWS_OPENSSL_CLIENT_CERTS=/etc/ssl/certs
 # for cyassl, edit package/libs/cyassl/Makefile to include --enable-opensslextra
