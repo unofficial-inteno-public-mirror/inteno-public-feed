@@ -8,8 +8,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libwebsockets
-PKG_VERSION:=1.7.5
-PKG_RELEASE:=3
+PKG_VERSION:=2.0.2
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_PROTO:=git
@@ -17,7 +17,7 @@ PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_URL:=https://github.com/warmcat/libwebsockets.git
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_SOURCE_SUBDIR)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
 
 PKG_LICENSE:=LGPL-2.1+exception
 PKG_LICENSE_FILES:=LICENSE
@@ -57,7 +57,7 @@ define Package/$(PKG_NAME)/config
 	endchoice
 endef
 
-CMAKE_OPTIONS += $(if $(CONFIG_IPV6),,-DLWS_IPV6=)
+CMAKE_OPTIONS += -DLWS_IPV6=$(if $(CONFIG_IPV6),ON,OFF)
 CMAKE_OPTIONS += -DLWS_WITHOUT_TESTAPPS=ON
 
 # other options worth noting
@@ -83,7 +83,7 @@ ifeq ($(CONFIG_$(PKG_NAME)_SSL_CyaSSL),y)
 # for cyassl, edit package/libs/cyassl/Makefile to include --enable-opensslextra
 # NOTE: it will compile without it, untested whether it it's needed?!
 	CMAKE_OPTIONS += -DLWS_USE_CYASSL=ON
-	CMAKE_OPTIONS += -DLWS_CYASSL_LIB=$(STAGING_DIR)/usr/lib/libcyassl.so
+	CMAKE_OPTIONS += -DLWS_CYASSL_LIBRARIES=$(STAGING_DIR)/usr/lib/libcyassl.so
 	CMAKE_OPTIONS += -DLWS_CYASSL_INCLUDE_DIRS=$(STAGING_DIR)/usr/include
 endif
 
